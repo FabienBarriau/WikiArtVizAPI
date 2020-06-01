@@ -10,13 +10,14 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-app.config.from_object('config')
-
-client = MongoClient(app.config['MONGO_PATH'])
+client = MongoClient(port=27017)
 db = client['art']
 paintingsCollection = db['paintings']
 categoriesCollection = db['categories']
 
+@app.route('/', methods=['GET'])
+def welcome():
+    return 'Welcome in WikiArt API'
 
 @app.route('/api/v1/categories', methods=['GET'])
 @use_args({"labels": fields.DelimitedList(fields.Str())}, location="query")
