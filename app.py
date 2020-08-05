@@ -2,6 +2,7 @@ from flask import Flask
 from webargs import fields
 from webargs.flaskparser import use_args
 from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
 import numpy as np
 from sklearn.manifold import TSNE
 from schema import PaintingsPositionSchema, PaintingsDetailsSchema
@@ -11,7 +12,10 @@ import config as config
 app = Flask(__name__)
 CORS(app)
 
-db = MongoClient(host=config.MONGODB_HOST, port=config.MONGODB_PORT)[config.MONGODB_DATABASE]
+client = MongoClient(host=config.MONGODB_HOST, port=config.MONGODB_PORT)
+client.server_info()
+
+db = client[config.MONGODB_DATABASE]
 
 paintingsCollection = db['paintings']
 categoriesCollection = db['categories']
