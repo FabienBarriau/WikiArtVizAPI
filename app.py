@@ -1,17 +1,18 @@
 from flask import Flask
-from webargs import fields, validate
+from webargs import fields
 from webargs.flaskparser import use_args
 from pymongo import MongoClient
 import numpy as np
 from sklearn.manifold import TSNE
-from .schema import PaintingsPositionSchema, PaintingsDetailsSchema
+from schema import PaintingsPositionSchema, PaintingsDetailsSchema
 from flask_cors import CORS
+import config as config
 
 app = Flask(__name__)
 CORS(app)
 
-client = MongoClient(port=27017)
-db = client['art']
+db = MongoClient(host=config.MONGODB_HOST, port=config.MONGODB_PORT)[config.MONGODB_DATABASE]
+
 paintingsCollection = db['paintings']
 categoriesCollection = db['categories']
 
@@ -88,4 +89,4 @@ def paintingsDetail(args):
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host=config.APP_HOST, port=config.APP_PORT, debug=config.APP_DEBUG)
