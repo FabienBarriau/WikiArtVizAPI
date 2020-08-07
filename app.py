@@ -12,11 +12,8 @@ import config as config
 app = Flask(__name__)
 CORS(app)
 
-if (config.MONGODB_USERNAME is None) & (config.MONGODB_PASSWORD is None):
-    client = MongoClient(host=config.MONGODB_HOST, port=config.MONGODB_PORT)
-else:
-    client = MongoClient(host=config.MONGODB_HOST, port=config.MONGODB_PORT,
-                         username=config.MONGODB_USERNAME, password=config.MONGODB_PASSWORD)
+client = MongoClient(host=config.MONGODB_HOST, port=config.MONGODB_PORT)
+
 client.server_info()
 
 db = client[config.MONGODB_DATABASE]
