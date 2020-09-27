@@ -7,9 +7,7 @@ import config
 import numpy as np
 from sklearn.manifold import TSNE
 
-client = MongoClient(host=config.MONGODB_HOST, port=config.MONGODB_PORT,
-                     username=config.MONGODB_USERNAME, Password=config.MONGODB_PASSWORD,
-                     authSource=config.MONGODB_DATABASE)
+client = MongoClient(host=config.MONGODB_HOST, port=config.MONGODB_PORT)
 
 client.server_info()
 
