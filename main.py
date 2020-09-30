@@ -32,7 +32,6 @@ def root():
 
 @app.get('/categories')
 def categories(label: Optional[List[str]] = Query(None)):
-    print(label)
     if label:
         return categoriesCollection.find_one({}, label)
     else:
@@ -52,10 +51,8 @@ class PaintingsDetails(BaseModel):
 
 @app.get('/paintingsDetail', response_model=PaintingsDetails)
 def paintingsDetail(ids: List[str] = Query(None)):
-    print(ids, 'salut')
     output_args = ["title", "artistName", "description", "image", "styles", "galleries"]
     data = {'data': [paintingsCollection.find_one({'_id': _id}, output_args) for _id in ids]}
-    print(ids, data)
     return data
 
 class PaintingSchema(BaseModel):
@@ -102,7 +99,6 @@ def paintingPosition(artistName: Optional[List[str]] = Query(None), galleries: O
 
     output_args = ["image", "width", "height", metric]
     paintings = list(paintingsCollection.find(mongo_filter, output_args))
-    print(len(paintings))
 
     #If there is only one image, it's in the center.
     positions = np.array([[0, 0]])
@@ -133,7 +129,6 @@ def paintingPosition(artistName: Optional[List[str]] = Query(None), galleries: O
         }
 
     }
-    print(response)
     return response
 
 
