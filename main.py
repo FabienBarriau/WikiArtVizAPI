@@ -1,17 +1,22 @@
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
-from pymongo import MongoClient
 from typing import List, Optional
 from pydantic import BaseModel
-import config
 import numpy as np
 from sklearn.manifold import TSNE
+from database import Database, get_config
 
-client = MongoClient(host=config.MONGODB_HOST, port=config.MONGODB_PORT)
+config = get_config()
+database = Database(
+    database=config.get('DATABASE'),
+    host=config.get('DATABASE_HOST'),
+    port=config.get('DATABASE_PORT'),
+    username=config.get('DATABASE_USERNAME'),
+    password=config.get('DATABASE_PASSWORD')
+)
+database.connect()
 
-client.server_info()
-
-db = client[config.MONGODB_DATABASE]
+db = database.get_db()
 
 paintingsCollection = db['paintings']
 categoriesCollection = db['categories']
