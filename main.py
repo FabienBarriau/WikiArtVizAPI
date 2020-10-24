@@ -7,6 +7,7 @@ from sklearn.manifold import TSNE
 from database import Database, get_config
 
 config = get_config()
+print(config)
 database = Database(
     database=config.get('DATABASE'),
     host=config.get('DATABASE_HOST'),
