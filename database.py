@@ -26,7 +26,8 @@ class Database:
         self.client = None
 
     def connect(self):
-        self.client = MongoClient(host=self.host, port=self.port, username=self.username, password=self.password)
+        self.client = MongoClient(host=self.host, port=self.port,  authSource=self.database,
+                                  username=self.username, password=self.password)
         self.verify_connection()
 
     def verify_connection(self):
