@@ -2,7 +2,7 @@ import numpy as np
 from src.utils import sorted_random_sample
 
 def get_distance_for_art(art_id: str) -> dict:
-    return {'e': 4, 'r': 2}
+    return distanceCollection.find_one({'_id': ''}, ['encoding'])['encoding']
 
 def get_recommandations(art_id: str, nbr: int, radius: float=None):
     if (nbr == 0) | (radius == 0):
@@ -23,4 +23,3 @@ def get_recommandations(art_id: str, nbr: int, radius: float=None):
                 art_id_sort_by_distance_value_filtered_randomly_sample =\
                     [art_id_sort_by_distance_value_filtered[i] for i in sorted_random_sample(n, nbr)]
                 return art_id_sort_by_distance_value_filtered_randomly_sample
-

@@ -1,5 +1,6 @@
 from src.recommandation import get_recommandations
 from src.utils import sorted_random_sample
+from src.recommandation import get_distance_for_art
 from unittest.mock import patch
 import pytest
 
@@ -65,32 +66,32 @@ class TestRecommandation:
             return_value=simple_distance_response_for_art_id
         )
         mocker.patch(
-            'src.utils.sorted_random_sample',
-            return_value=[[0, 2]]
+            'src.recommandation.sorted_random_sample',
+            return_value=[0, 2]
         )
         assert get_recommandations(art_id="Starry night", nbr=2, radius=1) == \
                ["Wheatfield with Crows", "The Potato eaters"]
 
     def test_too_much_art_in_radius_2(self, mocker, simple_distance_response_for_art_id):
         mocker.patch(
-            'src.recommandation.get_distance_for_art',
-            return_value=simple_distance_response_for_art_id
+            'src.recommandation.sorted_random_sample',
+            return_value=[0, 1]
         )
         mocker.patch(
-            'src.utils.sorted_random_sample',
-            return_value=[[0, 1]]
+            'src.recommandation.get_distance_for_art',
+            return_value=simple_distance_response_for_art_id
         )
         assert get_recommandations(art_id="Starry night", nbr=2, radius=1) ==\
                ["Wheatfield with Crows", "Paul Gauguin's Armchair"]
 
     def test_too_much_art_in_radius_3(self, mocker, simple_distance_response_for_art_id):
         mocker.patch(
-            'src.recommandation.get_distance_for_art',
-            return_value=simple_distance_response_for_art_id
+            'src.recommandation.sorted_random_sample',
+            return_value=[1, 2]
         )
         mocker.patch(
-            'src.utils.sorted_random_sample',
-            return_value=[[1, 2]]
+            'src.recommandation.get_distance_for_art',
+            return_value=simple_distance_response_for_art_id
         )
         assert get_recommandations(art_id="Starry night", nbr=2, radius=1) == \
                ["Paul Gauguin's Armchair", "The Potato eaters"]

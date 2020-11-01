@@ -38,6 +38,9 @@ class Database:
     def get_db(self):
         return self.client[self.database]
 
+    def get_distance_for_art(self, art_id: str, metric: str) -> dict:
+        return self.client[self.database].find_one({'_id': art_id}, [metric])[metric]
+
 
 
 
