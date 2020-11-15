@@ -4,7 +4,9 @@ from typing import List, Optional
 from pydantic import BaseModel
 import numpy as np
 from sklearn.manifold import TSNE
-from database import Database, get_config
+from src.database import Database, Metric, get_config
+from src.recommandation import get_recommendations_by_distance
+from src.position import get_bounding_box
 
 config = get_config()
 database = Database(
@@ -37,10 +39,8 @@ def root():
 
 @app.get('/categories')
 def categories(label: Optional[List[str]] = Query(None)):
-    if label:
-        return categoriesCollection.find_one({}, label)
-    else:
-        return categoriesCollection.find_one({})
+    return database.get_categories(label)
+
 
 class PaintingDetail(BaseModel):
     _id: str
@@ -51,14 +51,15 @@ class PaintingDetail(BaseModel):
     galleries: Optional[List[str]]
     styles: Optional[List[str]]
 
+
 class PaintingsDetails(BaseModel):
     data: List[PaintingDetail]
 
+
 @app.get('/paintingsDetail', response_model=PaintingsDetails)
 def paintingsDetail(ids: List[str] = Query(None)):
-    output_args = ["title", "artistName", "description", "image", "styles", "galleries"]
-    data = {'data': [paintingsCollection.find_one({'_id': _id}, output_args) for _id in ids]}
-    return data
+    return {'data': database.get_arts_info(ids, ["title", "artistName", "description", "image", "styles", "galleries"])}
+
 
 class PaintingSchema(BaseModel):
     paintingsId: str
@@ -81,29 +82,22 @@ class PaintingsPositionSchema(BaseModel):
     bounding_box: BoundingBoxSchema
 
 
-
 @app.get('/paintingsPosition', response_model=PaintingsPositionSchema)
-def paintingPosition(artistName: Optional[List[str]] = Query(None), galleries: Optional[List[str]] = Query(None),
+def paintingPosition(metric: Metric,
+                     artistName: Optional[List[str]] = Query(None), galleries: Optional[List[str]] = Query(None),
                      genres: Optional[List[str]] = Query(None), media: Optional[List[str]] = Query(None),
-                     period: Optional[List[str]] = Query(None), styles: Optional[List[str]] = Query(None),
-                     metric: str = None):
+                     period: Optional[List[str]] = Query(None), styles: Optional[List[str]] = Query(None)):
 
-    mongo_filter = {}
-    if artistName is not None:
-        mongo_filter['artistName'] = {"$in": artistName}
-    if galleries is not None:
-        mongo_filter['galleries'] = {"$in": galleries}
-    if genres is not None:
-        mongo_filter['genres'] = {"$in": genres}
-    if media is not None:
-        mongo_filter['media'] = {"$in": media}
-    if styles is not None:
-        mongo_filter['styles'] = {"$in": styles}
-    if period is not None:
-        mongo_filter['period'] = {"$in": period}
-
-    output_args = ["image", "width", "height", metric]
-    paintings = list(paintingsCollection.find(mongo_filter, output_args))
+    filter = {
+        "artistName": artistName,
+        "galleries": galleries,
+        "genres": genres,
+        "media": media,
+        "period": period,
+        "styles": styles
+    }
+    ids = database.get_arts_ids(filter)
+    paintings = database.get_arts_info(ids, ["image", "width", "height", metric.value])
 
     #If there is only one image, it's in the center.
     positions = np.array([[0, 0]])
@@ -111,29 +105,27 @@ def paintingPosition(artistName: Optional[List[str]] = Query(None), galleries: O
     if len(paintings) > 1:
         encodings = []
         for painting in paintings:
-            encodings.append(painting.pop(metric))
+            encodings.append(painting.pop(metric.value))
         positions = TSNE(n_components=2, random_state=42).fit_transform(np.stack(encodings))
 
     for count, painting in enumerate(paintings):
         painting["x"] = positions[count, 0]
         painting["y"] = positions[count, 1]
 
-    max_positions = np.max(positions, axis=0)
-    min_positions = np.min(positions, axis=0)
-
     for painting in paintings:
         painting['paintingsId'] = painting.pop('_id')
 
     response = {
         "data": paintings,
-        "bounding_box": {
-            "x_max": max_positions[0],
-            "x_min": min_positions[0],
-            "y_max": max_positions[1],
-            "y_min": min_positions[1],
-        }
-
+        "bounding_box": get_bounding_box(positions)
     }
     return response
+
+
+@app.get('/paintingRecommendation', response_model=PaintingsDetails)
+def paintings_recommendations(art_id: str, nbr: int, metric: Metric, radius: float = None):
+    distance_dict = database.get_distance_for_art(art_id, metric)
+    art_ids = get_recommendations_by_distance(distance_dict, nbr, radius)
+    return {'data': database.get_arts_info(art_ids, infos=["title", "artistName", "description", "image", "styles", "galleries"])}
 
 
