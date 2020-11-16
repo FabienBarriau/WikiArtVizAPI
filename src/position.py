@@ -1,4 +1,6 @@
 import numpy as np
+from typing import List
+from sklearn.manifold import TSNE
 
 
 def get_bounding_box(positions: np.array) -> dict:
@@ -11,3 +13,12 @@ def get_bounding_box(positions: np.array) -> dict:
         "y_min": min_positions[1],
     }
     return bounding_box
+
+
+def get_2d_projected_positions(encodings: List[List[float]]) -> np.array:
+    # If there is only one image, it's in the center.
+    if len(encodings) <= 1:
+        return np.array([[0, 0]])
+    # If there are more image compute TSNE with always the same seed.
+    else:
+        return TSNE(n_components=2, random_state=42).fit_transform(np.stack(encodings))

@@ -4,7 +4,7 @@ import json
 from enum import Enum
 
 
-def get_config(force_env: bool = False) -> dict:
+def get_db_config(force_env: bool = False) -> dict:
     config = {}
     if ('db_config.json' in os.listdir('./config')) and not force_env:
         with open('./config/db_config.json') as json_file:
@@ -64,7 +64,7 @@ class Database:
     def get_arts_info(self, art_ids: list, infos: list) -> list:
         return [self.get_art_info(art_id, infos) for art_id in art_ids]
 
-    def get_categories(self, label: list):
+    def get_categories(self, label: list) -> dict:
         if label:
             return self.client[self.database]['categories'].find_one({}, label)
         else:
