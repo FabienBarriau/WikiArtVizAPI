@@ -14,6 +14,7 @@ database = Database(
     username=db_config.get('DATABASE_USERNAME'),
     password=db_config.get('DATABASE_PASSWORD')
 )
+print(database)
 database.connect()
 
 app = FastAPI()
@@ -38,7 +39,10 @@ def categories(label: Optional[List[str]] = Query(None)):
 
 @app.get('/paintingsDetail', response_model=PaintingsDetails)
 def paintings_detail(ids: List[str] = Query(None)):
-    return {'data': database.get_arts_info(ids, ["title", "artistName", "description", "image", "styles", "galleries"])}
+    paintings_list = database.get_arts_info(ids, ["title", "artistName", "description", "image", "styles", "galleries"])
+    for painting in paintings_list:
+        painting['paintingId'] = painting.pop('_id')
+    return {'data': paintings_list}
 
 
 @app.get('/paintingsPosition', response_model=PaintingsPositionSchema)
@@ -79,6 +83,9 @@ def paintings_positions(metric: Metric,
 def paintings_recommendations(art_id: str, nbr: int, metric: Metric, radius: float = None):
     distance_dict = database.get_distance_for_art(art_id, metric)
     art_ids = get_recommendations_by_distance(distance_dict, nbr, radius)
-    return {'data': database.get_arts_info(art_ids, infos=["title", "artistName", "description", "image", "styles", "galleries"])}
+    paintings_list = database.get_arts_info(art_ids, infos=["title", "artistName", "description", "image", "styles", "galleries"])
+    for painting in paintings_list:
+        painting['paintingId'] = painting.pop('_id')
+    return {'data': paintings_list}
 
 

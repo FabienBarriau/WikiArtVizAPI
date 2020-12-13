@@ -31,6 +31,16 @@ class Database:
         self.password = password
         self.client = None
 
+    def __str__(self):
+        return f'database: {self.database}\n' \
+        f'host: {self.host}\n' \
+        f'port: {self.port}\n' \
+        f'username: {self.username}\n' \
+        f'password: {"".join(["x" for _ in self.password])}\n' \
+        f'connected: {self.client is not None}\n' \
+
+
+
     def connect(self):
         self.client = MongoClient(host=self.host, port=self.port,  authSource=self.database,
                                   username=self.username, password=self.password)

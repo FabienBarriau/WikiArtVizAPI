@@ -1,8 +1,9 @@
 from pydantic import BaseModel
 from typing import List, Optional
 
+
 class PaintingDetail(BaseModel):
-    _id: str
+    paintingId: str
     title: str
     artistName: str
     image: Optional[str]
