@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from typing import List
+from typing import List, Dict
 
 
 def compute_distance_between_one_and_all(encoding: List[float], other_encodings: List[List[float]]) -> np.array:
@@ -17,3 +17,10 @@ def get_distance_between_one_and_all(n: int, paintings: list, encoding_name: str
             selected_painting_encoding-other_painting_encoding
         )
     return result
+
+
+def get_distance_between_encoding_and_encoding_list(encoding: List[float], encoding_list: List[Dict], encoding_name: str) -> Dict[str, float]:
+    distance_dict = dict()
+    for other_encoding in encoding_list:
+        distance_dict[other_encoding["_id"]] = np.linalg.norm(np.array(encoding) - np.array(other_encoding[encoding_name]))
+    return distance_dict

@@ -1,10 +1,13 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from src.ouput_schema import PaintingsDetails, PaintingsPositionSchema
 from src.database import Database, Metric, get_db_config
+from src.distance import get_distance_between_encoding_and_encoding_list
 from src.recommandation import get_recommendations_by_distance
 from src.position import get_bounding_box, get_2d_projected_positions
+from src.utils import convert_bytes_to_img
+from src.encodings import create_encoding_dict
 
 db_config = get_db_config()
 database = Database(
@@ -14,8 +17,8 @@ database = Database(
     username=db_config.get('DATABASE_USERNAME'),
     password=db_config.get('DATABASE_PASSWORD')
 )
-print(database)
 database.connect()
+ENCODINGS_DICT = create_encoding_dict()
 
 app = FastAPI()
 
@@ -88,4 +91,19 @@ def paintings_recommendations(art_id: str, nbr: int, metric: Metric, radius: flo
         painting['paintingId'] = painting.pop('_id')
     return {'data': paintings_list}
 
+
+@app.post('/paintingRecommendation')
+def paintings_recommandations_for_user_picture(file: bytes = File(...), nbr: int = Form(...), metric: Metric = Form(...), radius: float = Form(None)):
+    img = convert_bytes_to_img(file)
+    if img == -1:
+        raise HTTPException(status_code=422, detail="Failed to load file as an image")
+    user_encoding = ENCODINGS_DICT[metric.name].compute_for_one(img)
+    db_encodings = database.get_arts_info_for_all([metric.value])
+    distance_dict = get_distance_between_encoding_and_encoding_list(user_encoding, db_encodings, metric.value)
+    art_ids = get_recommendations_by_distance(distance_dict, nbr, radius)
+    paintings_list = database.get_arts_info(art_ids, infos=["title", "artistName", "description", "image", "styles",
+                                                            "galleries"])
+    for painting in paintings_list:
+        painting['paintingId'] = painting.pop('_id')
+    return {'data': paintings_list}
 

@@ -74,6 +74,9 @@ class Database:
     def get_arts_info(self, art_ids: list, infos: list) -> list:
         return [self.get_art_info(art_id, infos) for art_id in art_ids]
 
+    def get_arts_info_for_all(self, infos: list) -> list:
+        return self.client[self.database]['paintings'].find({}, infos)
+
     def get_categories(self, label: list) -> dict:
         if label:
             return self.client[self.database]['categories'].find_one({}, label)
