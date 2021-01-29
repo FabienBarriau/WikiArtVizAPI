@@ -59,6 +59,7 @@ class TestDistanceBetweenOneAndAll:
         }
         assert result == expected_result
 
+
 class TestDistanceBetweenEncodingAndListOfEncoding:
 
     @pytest.fixture
