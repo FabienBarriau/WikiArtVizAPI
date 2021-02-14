@@ -82,29 +82,29 @@ def paintings_positions(metric: Metric,
     return response
 
 
-# @app.get('/paintingRecommendation', response_model=PaintingsDetails)
-# def paintings_recommendations(art_id: str, nbr: int, metric: Metric, radius: float = None):
-#     distance_dict = database.get_distance_for_art(art_id, metric)
-#     art_ids = get_recommendations_by_distance(distance_dict, nbr, radius)
-#     paintings_list = database.get_arts_info(art_ids, infos=["title", "artistName", "description", "image", "styles", "galleries"])
-#     for painting in paintings_list:
-#         painting['paintingId'] = painting.pop('_id')
-#     return {'data': paintings_list}
-
 @app.get('/paintingRecommendation', response_model=PaintingsDetails)
 def paintings_recommendations(art_id: str, nbr: int, metric: Metric, radius: float = None):
-    db_encodings = database.get_arts_info_for_all([metric.value])
-    art_encoding = None
-    for c, encoding in enumerate(db_encodings):
-        if encoding["_id"] == art_id:
-            art_encoding = db_encodings.pop(c)[metric.value]
-            break
-    distance_dict = get_distance_between_encoding_and_encoding_list(art_encoding, db_encodings, metric.value)
+    distance_dict = database.get_distance_for_art(art_id, metric)
     art_ids = get_recommendations_by_distance(distance_dict, nbr, radius)
     paintings_list = database.get_arts_info(art_ids, infos=["title", "artistName", "description", "image", "styles", "galleries"])
     for painting in paintings_list:
         painting['paintingId'] = painting.pop('_id')
     return {'data': paintings_list}
+
+# @app.get('/paintingRecommendation', response_model=PaintingsDetails)
+# def paintings_recommendations(art_id: str, nbr: int, metric: Metric, radius: float = None):
+#     db_encodings = database.get_arts_info_for_all([metric.value])
+#     art_encoding = None
+#     for c, encoding in enumerate(db_encodings):
+#         if encoding["_id"] == art_id:
+#             art_encoding = db_encodings.pop(c)[metric.value]
+#             break
+#     distance_dict = get_distance_between_encoding_and_encoding_list(art_encoding, db_encodings, metric.value)
+#     art_ids = get_recommendations_by_distance(distance_dict, nbr, radius)
+#     paintings_list = database.get_arts_info(art_ids, infos=["title", "artistName", "description", "image", "styles", "galleries"])
+#     for painting in paintings_list:
+#         painting['paintingId'] = painting.pop('_id')
+#     return {'data': paintings_list}
 
 
 @app.post('/paintingRecommendation')
