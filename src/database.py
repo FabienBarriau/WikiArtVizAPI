@@ -54,6 +54,10 @@ class Database:
     def get_db(self):
         return self.client[self.database]
 
+    def get_random_arts_ids(self, nbr: int) -> list:
+        ids_dict = list(self.client[self.database]['paintings'].aggregate([{'$sample': {'size': nbr}}]))
+        return [id_dict["_id"] for id_dict in ids_dict]
+
     def get_distance_for_art(self, art_id: str, metric: Metric) -> dict:
         return self.client[self.database]['distance'].find_one({'_id': art_id}, [metric.value])[metric.value]
 
