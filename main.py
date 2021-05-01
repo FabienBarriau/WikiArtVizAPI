@@ -48,6 +48,7 @@ def paintings_detail(ids: List[str] = Query(None)):
         painting['paintingId'] = painting.pop('_id')
     return {'data': paintings_list}
 
+
 @app.get('/paintingsPosition/randomSample', response_model=PaintingsPositionSchema)
 def paintings_positions_random(nbr: int, metric: Metric):
 
@@ -69,7 +70,6 @@ def paintings_positions_random(nbr: int, metric: Metric):
         "bounding_box": get_bounding_box(positions)
     }
     return response
-
 
 
 @app.get('/paintingsPosition/appliedFilters', response_model=PaintingsPositionSchema)
